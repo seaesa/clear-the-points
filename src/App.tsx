@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import Time from './Time'
 
 interface Direction {
   horizontal: number,
@@ -85,10 +86,9 @@ const BoxInSide: React.FC<BoxInSideProps> = memo(( // wrap memo to avoid re-rend
 function App() {
   const [input, setInput] = useState<string>('')
   const [boxs, setBoxs] = useState<BoxProps[]>([])
-  const [seconds, setSeconds] = useState<number>(0)
-  const [milliseconds, setMilliseconds] = useState<number>(0)
   const [onPlay, setOnPlay] = useState<boolean>(false)
   const [choice, setChoice] = useState<boolean>(false)
+  const [resetTime, setResetTime] = useState<boolean>(false)
   const [showResult, setShowResult] = useState<'LET\'s PLAY' | 'GAME OVER' | 'ALL CLEARED'>('LET\'s PLAY')
 
   const blockRef = useRef<HTMLDivElement>(null);
@@ -107,8 +107,7 @@ function App() {
       setShowResult('LET\'s PLAY')
       setChoice(false)
       setOnPlay(true)
-      setSeconds(0)
-      setMilliseconds(0)
+      setResetTime(time => !time)
       setBoxs(() => {
         const divBlock = blockRef.current as HTMLDivElement
         const clientWidth = (divBlock?.clientWidth - 32) // 32 is width of points
@@ -146,23 +145,6 @@ function App() {
     setChoice(true)
   }, [])
 
-  // show mili seconds number
-  useEffect(() => {
-    if (onPlay) {
-      const timer = setInterval(() => setMilliseconds(mili => (mili >= 9 ? 0 : mili + 1)), 100)
-      return () => clearInterval(timer)
-    }
-  }, [onPlay])
-
-  // show seconds number
-  useEffect(() => {
-    if (onPlay) {
-      const timer = setInterval(() => setSeconds(time => time + 1), 1000)
-      // avoid side effect
-      return () => clearInterval(timer)
-    }
-  }, [onPlay])
-
   return (
     <div className='justify-center flex flex-col items-center font-bold'>
       <div className='space-y-2 w-[90%] lg:w-[50%] mx-auto'>
@@ -181,8 +163,7 @@ function App() {
               type="text" className='border border-gray-600 rounded-sm max-w-[200px] px-1' />
           </div>
           <div className='flex space-x-6'>
-            <span>Time: </span>
-            <span>{`${seconds}:${milliseconds}`}s</span>
+            <Time onPlay={onPlay} resetTime={resetTime} />
           </div>
         </div>
         <button
