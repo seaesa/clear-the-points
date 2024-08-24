@@ -1,12 +1,13 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import Time from './Time'
+import { binarySearch } from './utils'
 
 interface Direction {
   horizontal: number,
   vertical: number,
 }
 
-interface BoxProps {
+export interface BoxProps {
   id: string,
   direction: Direction,
   value: number,
@@ -31,7 +32,6 @@ const BoxInSide: React.FC<BoxInSideProps> = memo(( // wrap memo to avoid re-rend
     handleGameOver,
     clicked,
     boxs,
-    id,
     choice
   }
 ) => {
@@ -41,14 +41,17 @@ const BoxInSide: React.FC<BoxInSideProps> = memo(( // wrap memo to avoid re-rend
   // handle when click to the points
   const handleClickBox = useCallback(() => {
     if (!choice) {
-      setBoxs(box => (box.map(box => ((box.id === id) ? { ...box, clicked: true } : box))))
+      // apply searching binary algorithms
+      setBoxs(box => binarySearch(box, value, ((number) => {
+        box[number].clicked = true
+      })))
     }
   }, [choice])
 
   // check when click to bigger value to the current value
   useEffect(() => {
     if (clicked) {
-      const isBigger = boxs.filter(box => (box.clicked === false)).some(box => (value > box.value))
+      const isBigger = boxs.some(box => (box.clicked === false && value > box.value))
       setIsValid(!isBigger)
       setClick(true)
     }
@@ -58,7 +61,9 @@ const BoxInSide: React.FC<BoxInSideProps> = memo(( // wrap memo to avoid re-rend
   useEffect(() => {
     if (isValid) {
       const timeOut = setTimeout(() => {
-        setBoxs(box => (box.filter(box => (box.id !== id))))
+        setBoxs(box => binarySearch(box, value, ((number) => {
+          box.splice(number, 1)
+        })))
       }, 2000)
       return () => clearTimeout(timeOut)
     }
