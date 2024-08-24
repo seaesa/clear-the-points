@@ -25,10 +25,10 @@ function Time({ onPlay, resetTime }: { onPlay: boolean, resetTime: boolean }) {
     }
   }, [onPlay])
   return (
-    <>
+    <div className='flex space-x-6'>
       <span>Time: </span>
       <span>{`${seconds}:${milliSeconds}`}s</span>
-    </>
+    </div>
   )
 }
 export default memo(Time)

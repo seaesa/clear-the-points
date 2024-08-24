@@ -1,6 +1,6 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Time from './Time'
-import { binarySearch } from './utils'
+import BoxInSide from './BoxInSide'
 
 interface Direction {
   horizontal: number,
@@ -15,7 +15,7 @@ export interface BoxProps {
   clicked: boolean,
 }
 
-interface BoxInSideProps extends BoxProps {
+export interface BoxInSideProps extends BoxProps {
   boxs: BoxProps[],
   clicked: boolean,
   choice: boolean,
@@ -23,71 +23,6 @@ interface BoxInSideProps extends BoxProps {
   handleGameOver: () => void
 }
 
-const BoxInSide: React.FC<BoxInSideProps> = memo(( // wrap memo to avoid re-render unecsessary
-  {
-    direction: { horizontal, vertical },
-    value,
-    zIndex,
-    setBoxs,
-    handleGameOver,
-    clicked,
-    boxs,
-    choice
-  }
-) => {
-  const [isValid, setIsValid] = useState<boolean>(false)
-  const [click, setClick] = useState<boolean>(false)
-
-  // handle when click to the points
-  const handleClickBox = useCallback(() => {
-    if (!choice) {
-      // apply searching binary algorithms
-      setBoxs(box => binarySearch(box, value, ((number) => {
-        box[number].clicked = true
-      })))
-    }
-  }, [choice])
-
-  // check when click to bigger value to the current value
-  useEffect(() => {
-    if (clicked) {
-      const isBigger = boxs.some(box => (box.clicked === false && value > box.value))
-      setIsValid(!isBigger)
-      setClick(true)
-    }
-  }, [clicked])
-
-  // destroy the points
-  useEffect(() => {
-    if (isValid) {
-      const timeOut = setTimeout(() => {
-        setBoxs(box => binarySearch(box, value, ((number) => {
-          box.splice(number, 1)
-        })))
-      }, 2000)
-      return () => clearTimeout(timeOut)
-    }
-  }, [isValid])
-
-  // handle lose game when click to bigger value to the current value
-  useEffect(() => {
-    if (!isValid && click) {
-      handleGameOver()
-    }
-  }, [click])
-
-  return (
-    <div
-      onClick={handleClickBox}
-      style={{
-        zIndex,
-        inset: `${vertical}px ${horizontal}px`
-      }}
-      className={`select-none absolute rounded-full w-8 h-8 border border-gray-600 flex justify-center items-center cursor-pointer ${isValid ? 'bg-red-600 duration-1000' : 'bg-white'}`}>
-      <span>{value}</span>
-    </div>
-  )
-})
 function App() {
   const [input, setInput] = useState<string>('')
   const [boxs, setBoxs] = useState<BoxProps[]>([])
@@ -167,9 +102,8 @@ function App() {
               onChange={e => setInput(e.target.value)}
               type="text" className='border border-gray-600 rounded-sm max-w-[200px] px-1' />
           </div>
-          <div className='flex space-x-6'>
-            <Time onPlay={onPlay} resetTime={resetTime} />
-          </div>
+
+          <Time onPlay={onPlay} resetTime={resetTime} />
         </div>
         <button
           onClick={handlePlayGame}
@@ -181,7 +115,6 @@ function App() {
           {boxs.length > 0 && boxs.map(box => (
             <BoxInSide
               key={box.id}
-              id={box.id}
               direction={box.direction}
               value={box.value}
               zIndex={box.zIndex}
