@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useState } from 'react'
-import { binarySearch } from './utils'
-import { BoxInSideProps } from './App'
+import { binarySearch } from '../lib/utils'
+import { BoxInSideProps } from '../App'
 
 const BoxInSide: React.FC<Omit<BoxInSideProps, 'id'>> = ( // wrap memo to avoid re-render unecsessary
   {
@@ -26,7 +26,6 @@ const BoxInSide: React.FC<Omit<BoxInSideProps, 'id'>> = ( // wrap memo to avoid 
       })))
     }
   }, [choice])
-
   // check when click to bigger value to the current value
   useEffect(() => {
     if (clicked) {

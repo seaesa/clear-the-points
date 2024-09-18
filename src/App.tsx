@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Time from './Time'
-import BoxInSide from './BoxInSide'
+import Time from './components/Time'
+import BoxInSide from './components/BoxInSide'
 
 interface Direction {
   horizontal: number,
@@ -52,7 +52,7 @@ function App() {
         const divBlock = blockRef.current as HTMLDivElement
         const clientWidth = (divBlock?.clientWidth - 32) // 32 is width of points
         const clientHeight = (divBlock?.clientHeight - 32)
-        return [...new Array(Number(input))].map((_undefined, index) => (
+        return [...new Array(Number(input))].map((_, index) => (
           {
             id: crypto.randomUUID(),
             direction: {
@@ -112,7 +112,7 @@ function App() {
         <div
           ref={blockRef}
           className='border border-gray-600 shadow-sm w-full h-[500px] rounded-sm relative overflow-hidden'>
-          {boxs.length > 0 && boxs.map(box => (
+          {boxs.length > 0 && boxs.map((box) => (
             <BoxInSide
               key={box.id}
               direction={box.direction}

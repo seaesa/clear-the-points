@@ -1,6 +1,6 @@
-import { BoxProps } from './App'
+import { BoxProps } from '../App'
 
-type CallBack = (middleArray: number) => void
+type CallBack = (num: number) => void
 export const binarySearch = (box: BoxProps[], value: number, callback: CallBack) => {
   let headArray = 0;
   let endArray = box.length - 1;
