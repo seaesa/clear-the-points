@@ -1,4 +1,4 @@
-<h2 align="center">Coding test from RPG &middot; Clear The Points Game</h2>
+<h2 align="center">Coding Assignment </h2>
 
 ## Preview:
 
