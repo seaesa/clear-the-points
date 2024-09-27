@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Time from './components/Time'
-import BoxInSide from './components/BoxInSide'
+import BoxInSide, { initial } from './components/BoxInSide'
 
 interface Direction {
   horizontal: number,
@@ -12,14 +12,9 @@ export interface BoxProps {
   direction: Direction,
   value: number,
   zIndex: number,
-  clicked: boolean,
 }
 
-export interface BoxInSideProps extends BoxProps {
-  boxs: BoxProps[],
-  clicked: boolean,
-  choice: boolean,
-  setBoxs: React.Dispatch<React.SetStateAction<BoxProps[]>>,
+export interface BoxInSideProps extends Omit<BoxProps, 'id'> {
   handleGameOver: () => void
 }
 
@@ -27,7 +22,6 @@ function App() {
   const [input, setInput] = useState<string>('')
   const [boxs, setBoxs] = useState<BoxProps[]>([])
   const [onPlay, setOnPlay] = useState<boolean>(false)
-  const [choice, setChoice] = useState<boolean>(false)
   const [resetTime, setResetTime] = useState<boolean>(false)
   const [showResult, setShowResult] = useState<'LET\'s PLAY' | 'GAME OVER' | 'ALL CLEARED'>('LET\'s PLAY')
 
@@ -44,8 +38,9 @@ function App() {
   const handlePlayGame = useCallback((e: React.MouseEvent) => {
     if (input) {
       (e.target as HTMLDivElement).innerText = 'Restart';
+      initial.previousValue = 0;
       setShowResult('LET\'s PLAY')
-      setChoice(false)
+      blockRef.current?.classList.remove('pointer-events-none')
       setOnPlay(true)
       setResetTime(time => !time)
       setBoxs(() => {
@@ -59,7 +54,6 @@ function App() {
               horizontal: Math.round(Math.random() * clientWidth),
               vertical: Math.round(Math.random() * clientHeight),
             },
-            clicked: false,
             value: ++index,
             zIndex: Number(input) - index,
           }
@@ -68,22 +62,33 @@ function App() {
     }
   }, [input])
 
-  // handle when game win
-  useEffect(() => {
-    const isWinner = (boxs.length <= 0) && (onPlay === true)
-    if (isWinner) {
-      setShowResult('ALL CLEARED')
-      setOnPlay(false)
-      setBoxs([])
-    }
-  }, [boxs])
-
   // handle when game lose | wrap function in useCallbacl hook to make sure memo HOC can be work
   const handleGameOver = useCallback(() => {
     setShowResult('GAME OVER')
     setOnPlay(false)
-    setChoice(true)
+    blockRef.current?.classList.add('pointer-events-none')
   }, [])
+
+  const handleWinner = useCallback(() => {
+    initial.previousValue = 0;
+    setShowResult('ALL CLEARED')
+    setOnPlay(false)
+    setBoxs([])
+  }, [])
+
+  useEffect(() => {
+    if (onPlay) {
+      const element = blockRef.current!
+      const observer = new MutationObserver(() => {
+        if (!element?.childElementCount)
+          handleWinner()
+      });
+      observer.observe(element, {
+        childList: true
+      });
+      return () => observer.disconnect();
+    }
+  }, [onPlay])
 
   return (
     <div className='justify-center flex flex-col items-center font-bold'>
@@ -112,20 +117,18 @@ function App() {
         <div
           ref={blockRef}
           className='border border-gray-600 shadow-sm w-full h-[500px] rounded-sm relative overflow-hidden'>
-          {boxs.length > 0 && boxs.map((box) => (
-            <BoxInSide
-              key={box.id}
-              direction={box.direction}
-              value={box.value}
-              zIndex={box.zIndex}
-              setBoxs={setBoxs}
-              boxs={boxs}
-              clicked={box.clicked}
-              choice={choice}
-              handleGameOver={handleGameOver}
-            />
-          )
-          )}
+          <>
+            {boxs.length > 0 && boxs.map((box) => (
+              <BoxInSide
+                key={box.id}
+                direction={box.direction}
+                value={box.value}
+                zIndex={box.zIndex}
+                handleGameOver={handleGameOver}
+              />
+            )
+            )}
+          </>
         </div>
       </div>
     </div>
