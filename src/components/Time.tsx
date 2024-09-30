@@ -1,10 +1,10 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function Time({ onPlay, resetTime }: { onPlay: boolean, resetTime: boolean }) {
   const [startTime, setStartTime] = useState(0);
   const [timeNow, setTimeNow] = useState(0);
 
-  const seconds = useMemo(() => (timeNow - startTime) / 1000, [timeNow])
+  const seconds = (timeNow - startTime) / 1000
 
   useEffect(() => {
     if (onPlay) {
@@ -24,4 +24,4 @@ function Time({ onPlay, resetTime }: { onPlay: boolean, resetTime: boolean }) {
     </div>
   )
 }
-export default memo(Time)
+export default Time

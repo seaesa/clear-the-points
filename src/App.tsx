@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Time from './components/Time'
 import BoxInSide, { initial } from './components/BoxInSide'
 
@@ -19,63 +19,61 @@ export interface BoxInSideProps extends Omit<BoxProps, 'id'> {
 }
 
 function App() {
-  const [input, setInput] = useState<string>('')
   const [boxs, setBoxs] = useState<BoxProps[]>([])
   const [onPlay, setOnPlay] = useState<boolean>(false)
   const [resetTime, setResetTime] = useState<boolean>(false)
   const [showResult, setShowResult] = useState<'LET\'s PLAY' | 'GAME OVER' | 'ALL CLEARED'>('LET\'s PLAY')
 
   const blockRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // block type character to input field
-  const handleInputTyping = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInputTyping = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const expression = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Backspace'].indexOf(e.key)
     if (expression === -1)
       e.preventDefault()
-  }, [])
+  }
 
   // handle play game
-  const handlePlayGame = useCallback((e: React.MouseEvent) => {
-    if (input) {
-      (e.target as HTMLDivElement).innerText = 'Restart';
-      initial.previousValue = 0;
-      setShowResult('LET\'s PLAY')
-      blockRef.current?.classList.remove('pointer-events-none')
-      setOnPlay(true)
-      setResetTime(time => !time)
-      setBoxs(() => {
-        const divBlock = blockRef.current as HTMLDivElement
-        const clientWidth = (divBlock?.clientWidth - 32) // 32 is width of points
-        const clientHeight = (divBlock?.clientHeight - 32)
-        return [...new Array(Number(input))].map((_, index) => (
-          {
-            id: crypto.randomUUID(),
-            direction: {
-              horizontal: Math.round(Math.random() * clientWidth),
-              vertical: Math.round(Math.random() * clientHeight),
-            },
-            value: ++index,
-            zIndex: Number(input) - index,
-          }
-        ))
-      })
-    }
-  }, [input])
+  const handlePlayGame = (e: React.MouseEvent) => {
+    const value = inputRef.current?.value;
+    initial.previousValue = 0;
+    blockRef.current?.classList.remove('pointer-events-none');
+    (e.target as HTMLDivElement).innerText = 'Restart';
+    setShowResult('LET\'s PLAY')
+    setOnPlay(true)
+    setResetTime(time => !time)
+    setBoxs(() => {
+      const divBlock = blockRef.current as HTMLDivElement
+      const clientWidth = (divBlock?.clientWidth - 32) // 32 is width of points
+      const clientHeight = (divBlock?.clientHeight - 32)
+      return [...new Array(Number(value))].map((_, index) => (
+        {
+          id: crypto.randomUUID(),
+          direction: {
+            horizontal: Math.round(Math.random() * clientWidth),
+            vertical: Math.round(Math.random() * clientHeight),
+          },
+          value: ++index,
+          zIndex: Number(value) - index,
+        }
+      ))
+    })
+  }
 
   // handle when game lose | wrap function in useCallbacl hook to make sure memo HOC can be work
-  const handleGameOver = useCallback(() => {
+  const handleGameOver = () => {
     setShowResult('GAME OVER')
     setOnPlay(false)
     blockRef.current?.classList.add('pointer-events-none')
-  }, [])
+  }
 
-  const handleWinner = useCallback(() => {
+  const handleWinner = () => {
     initial.previousValue = 0;
     setShowResult('ALL CLEARED')
     setOnPlay(false)
     setBoxs([])
-  }, [])
-
+  }
   useEffect(() => {
     if (onPlay) {
       const element = blockRef.current!
@@ -102,9 +100,8 @@ function App() {
           <div className='flex space-x-6'>
             <span>Points: </span>
             <input
-              value={input}
+              ref={inputRef}
               onKeyDown={handleInputTyping}
-              onChange={e => setInput(e.target.value)}
               type="text" className='border border-gray-600 rounded-sm max-w-[200px] px-1' />
           </div>
 
