@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
-function Time({ onPlay, resetTime }: { onPlay: boolean, resetTime: boolean }) {
+function Time({ play }: { play: { isPlay: boolean } }) {
   const [startTime, setStartTime] = useState(0);
   const [timeNow, setTimeNow] = useState(0);
 
   const seconds = (timeNow - startTime) / 1000
 
   useEffect(() => {
-    if (onPlay) {
+    if (play.isPlay) {
       setStartTime(Date.now())
       setTimeNow(Date.now())
       const timer = setInterval(() => {
@@ -15,7 +15,7 @@ function Time({ onPlay, resetTime }: { onPlay: boolean, resetTime: boolean }) {
       }, 100)
       return () => clearInterval(timer)
     }
-  }, [onPlay, resetTime])
+  }, [play])
 
   return (
     <div className='flex space-x-6'>

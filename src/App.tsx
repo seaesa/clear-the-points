@@ -20,8 +20,7 @@ export interface BoxInSideProps extends Omit<BoxProps, 'id'> {
 
 function App() {
   const [boxs, setBoxs] = useState<BoxProps[]>([])
-  const [onPlay, setOnPlay] = useState<boolean>(false)
-  const [resetTime, setResetTime] = useState<boolean>(false)
+  const [play, setOnPlay] = useState<{ isPlay: boolean }>({ isPlay: false })
   const [showResult, setShowResult] = useState<'LET\'s PLAY' | 'GAME OVER' | 'ALL CLEARED'>('LET\'s PLAY')
 
   const blockRef = useRef<HTMLDivElement>(null);
@@ -37,45 +36,47 @@ function App() {
   // handle play game
   const handlePlayGame = (e: React.MouseEvent) => {
     const value = inputRef.current?.value;
-    initial.previousValue = 0;
-    blockRef.current?.classList.remove('pointer-events-none');
-    (e.target as HTMLDivElement).innerText = 'Restart';
-    setShowResult('LET\'s PLAY')
-    setOnPlay(true)
-    setResetTime(time => !time)
-    setBoxs(() => {
-      const divBlock = blockRef.current as HTMLDivElement
-      const clientWidth = (divBlock?.clientWidth - 32) // 32 is width of points
-      const clientHeight = (divBlock?.clientHeight - 32)
-      return [...new Array(Number(value))].map((_, index) => (
-        {
-          id: crypto.randomUUID(),
-          direction: {
-            horizontal: Math.round(Math.random() * clientWidth),
-            vertical: Math.round(Math.random() * clientHeight),
-          },
-          value: ++index,
-          zIndex: Number(value) - index,
-        }
-      ))
-    })
+    if (value) {
+      initial.previousValue = 0;
+      blockRef.current?.classList.remove('pointer-events-none');
+      (e.target as HTMLDivElement).innerText = 'Restart';
+      setShowResult('LET\'s PLAY')
+      setOnPlay({ isPlay: true })
+      setBoxs(() => {
+        const divBlock = blockRef.current as HTMLDivElement
+        const clientWidth = (divBlock?.clientWidth - 32) // 32 is width of points
+        const clientHeight = (divBlock?.clientHeight - 32)
+        return [...new Array(Number(value))].map((_, index) => (
+          {
+            id: crypto.randomUUID(),
+            direction: {
+              horizontal: Math.round(Math.random() * clientWidth),
+              vertical: Math.round(Math.random() * clientHeight),
+            },
+            value: ++index,
+            zIndex: Number(value) - index,
+          }
+        ))
+      })
+    }
   }
 
   // handle when game lose | wrap function in useCallbacl hook to make sure memo HOC can be work
   const handleGameOver = () => {
     setShowResult('GAME OVER')
-    setOnPlay(false)
+    setOnPlay({ isPlay: false })
     blockRef.current?.classList.add('pointer-events-none')
   }
 
   const handleWinner = () => {
     initial.previousValue = 0;
-    setShowResult('ALL CLEARED')
-    setOnPlay(false)
     setBoxs([])
+    setShowResult('ALL CLEARED')
+    setOnPlay({ isPlay: false })
   }
+
   useEffect(() => {
-    if (onPlay) {
+    if (play.isPlay) {
       const element = blockRef.current!
       const observer = new MutationObserver(() => {
         if (!element?.childElementCount)
@@ -86,7 +87,7 @@ function App() {
       });
       return () => observer.disconnect();
     }
-  }, [onPlay])
+  }, [play])
 
   return (
     <div className='justify-center flex flex-col items-center font-bold'>
@@ -105,12 +106,13 @@ function App() {
               type="text" className='border border-gray-600 rounded-sm max-w-[200px] px-1' />
           </div>
 
-          <Time onPlay={onPlay} resetTime={resetTime} />
+          <Time play={play} />
         </div>
         <button
           onClick={handlePlayGame}
           className='px-3 py-1 bg-blue-500 hover:bg-blue-700 text-white capitalize rounded-md'>
-          Play </button>
+          Play
+        </button>
         <div
           ref={blockRef}
           className='border border-gray-600 shadow-sm w-full h-[500px] rounded-sm relative overflow-hidden'>
