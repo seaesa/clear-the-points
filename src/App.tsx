@@ -38,7 +38,7 @@ function App() {
     const value = inputRef.current?.value;
     if (value) {
       initial.previousValue = 0;
-      blockRef.current?.classList.remove('pointer-events-none');
+      blockRef.current?.classList.add('pointer-events-auto');
       (e.target as HTMLDivElement).innerText = 'Restart';
       setShowResult('LET\'s PLAY')
       setOnPlay({ isPlay: true })
@@ -61,14 +61,14 @@ function App() {
     }
   }
 
-  // handle when game lose | wrap function in useCallbacl hook to make sure memo HOC can be work
+  // handle when game lose 
   const handleGameOver = () => {
     setShowResult('GAME OVER')
     setOnPlay({ isPlay: false })
     blockRef.current?.classList.add('pointer-events-none')
   }
 
-  const handleWinner = () => {
+  const handleWinGame = () => {
     initial.previousValue = 0;
     setBoxs([])
     setShowResult('ALL CLEARED')
@@ -79,11 +79,12 @@ function App() {
     if (play.isPlay) {
       const element = blockRef.current!
       const observer = new MutationObserver(() => {
-        if (!element?.childElementCount)
-          handleWinner()
+        if (!element.childElementCount)
+          handleWinGame()
       });
       observer.observe(element, {
-        childList: true
+        childList: true,
+        subtree: true
       });
       return () => observer.disconnect();
     }

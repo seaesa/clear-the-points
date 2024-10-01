@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { BoxInSideProps } from '../App'
 
 
@@ -13,32 +13,30 @@ const BoxInSide: React.FC<BoxInSideProps> = (
     handleGameOver,
   }
 ) => {
-  const [click, setClick] = useState<boolean>(false)
   const [hidden, setHidden] = useState<boolean>(false)
+
   const boxRef = useRef<HTMLDivElement>(null)
+
   // handle when click to the points
   const handleClickBox = () => {
-    if (click === false && initial.previousValue !== value) {
+    if (initial.previousValue !== value) {
       if (value - 1 !== initial.previousValue) {
         initial.previousValue = 0;
         handleGameOver()
       }
       else {
         initial.previousValue = value;
-        setClick(true)
+        destroyThePoint()
       }
     }
   }
 
-  // destroy the points
-  useEffect(() => {
-    if (click) {
-      const timer = setTimeout(() => {
-        setHidden(true)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [click])
+  const destroyThePoint = () => {
+    boxRef.current?.classList.add('!bg-red-600', 'duration-1000', 'pointer-events-none');
+    setTimeout(() => {
+      setHidden(true)
+    }, 2000)
+  }
 
   return (
     !hidden &&
@@ -49,7 +47,7 @@ const BoxInSide: React.FC<BoxInSideProps> = (
         zIndex,
         inset: `${vertical}px ${horizontal}px`
       }}
-      className={`${click ? 'bg-red-600 duration-1000 pointer-events-none' : 'bg-white'} select-none absolute rounded-full w-8 h-8 border border-gray-600 flex justify-center items-center cursor-pointer`}>
+      className='bg-white select-none absolute rounded-full w-8 h-8 border border-gray-600 flex justify-center items-center cursor-pointer'>
       <span>{value}</span>
     </div>
   )
