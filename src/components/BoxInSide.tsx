@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { memo, useRef, useState } from 'react'
 import { BoxInSideProps } from '../App'
 
 
@@ -52,4 +52,4 @@ const BoxInSide: React.FC<BoxInSideProps> = (
     </div>
   )
 }
-export default BoxInSide
+export default memo(BoxInSide)

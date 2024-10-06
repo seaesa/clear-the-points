@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Time from './components/Time'
 import BoxInSide, { initial } from './components/BoxInSide'
 
@@ -62,11 +62,11 @@ function App() {
   }
 
   // handle when game lose 
-  const handleGameOver = () => {
+  const handleGameOver = useCallback(() => {
     setShowResult('GAME OVER')
     setOnPlay({ isPlay: false })
     blockRef.current?.classList.add('pointer-events-none')
-  }
+  }, [])
 
   const handleWinGame = () => {
     initial.previousValue = 0;
